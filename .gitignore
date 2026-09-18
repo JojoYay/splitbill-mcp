@@ -6,3 +6,6 @@ node_modules/
 key.pem
 auth-record.txt
 mcp-publisher*
+# mcp-publisher のリリース tar には LICENSE と README.md が入っていて、
+# ここで展開すると**こちらのものを上書きする**。展開物は追跡しない
+LICENSE.mcp-publisher
