@@ -1,12 +1,12 @@
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "com.jittee/splitbill",
-  "description": "Split bills and collect payments through PayNow (Singapore) from your AI.",
-  "version": "1.0.2",
+  "description": "Split bills and collect payments through PayNow (Singapore) from your AI. MCP server for SplitBill.",
   "repository": {
     "url": "https://github.com/JojoYay/splitbill-mcp",
     "source": "github"
   },
+  "version": "1.0.2",
   "packages": [
     {
       "registryType": "npm",
@@ -18,9 +18,10 @@
       "environmentVariables": [
         {
           "name": "SPLITBILL_TOKEN",
-          "description": "Your key from https://sposched.jittee.com/split/mcp/ (starts with wkn_)",
+          "description": "Your SplitBill key from https://sposched.jittee.com/split/mcp/ (starts with wkn_). It carries the PayNow account that collects the money.",
           "isRequired": true,
-          "isSecret": true
+          "isSecret": true,
+          "format": "string"
         }
       ]
     }

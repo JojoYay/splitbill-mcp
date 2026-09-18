@@ -1,122 +1,153 @@
-# SplitBill MCP
+# MCP Registry
 
-Split bills and collect payments through **PayNow (Singapore)** — from the AI you already use.
+The MCP registry provides MCP clients with a list of MCP servers, like an app store for MCP servers.
 
-You paid for the dinner. SplitBill works out who owes what and gives you links to send.
-Money never passes through us: everyone pays from their own banking app.
+[**📤 Publish my MCP server**](docs/modelcontextprotocol-io/quickstart.mdx) | [**⚡️ Live API docs**](https://registry.modelcontextprotocol.io/docs) | [**👀 Ecosystem vision**](docs/design/ecosystem-vision.md) | 📖 **[Full documentation](./docs)**
 
-- Product page: <https://jittee.com/splitbill>
-- Web app (no sign-up): <https://sposched.jittee.com/split/>
+## Development Status
 
-## Features
+**2025-10-24 update**: The Registry API has entered an **API freeze (v0.1)** 🎉. For the next month or more, the API will remain stable with no breaking changes, allowing integrators to confidently implement support. This freeze applies to v0.1 while development continues on v0. We'll use this period to validate the API in real-world integrations and gather feedback to shape v1 for general availability. Thank you to everyone for your contributions and patience—your involvement has been key to getting us here!
 
-- Create a split bill from a receipt or a total
-- Equal split, or a custom amount for one person (the rest is re-split)
-- The person who paid up front is counted but never billed
-- Participant management — names optional; payers can enter their own
-- Shareable payment URLs (one per amount) + a read-only status link
-- PayNow QR on the payment page
-- Payment status tracking (self-reported with a transfer screenshot)
-- Receipts attached to the total, visible to payers
-- 日本語 / English / 中文
+**2025-09-08 update**: The registry has launched in preview 🎉 ([announcement blog post](https://blog.modelcontextprotocol.io/posts/2025-09-08-mcp-registry-preview/)). While the system is now more stable, this is still a preview release and breaking changes or data resets may occur. A general availability (GA) release will follow later. We'd love your feedback in [GitHub discussions](https://github.com/modelcontextprotocol/registry/discussions/new?category=ideas) or in the [#registry-dev Discord](https://discord.com/channels/1358869848138059966/1369487942862504016) ([joining details here](https://modelcontextprotocol.io/community/communication)).
 
-## Example
+Registry Working Group:
+- **Radoslav (Rado) Dimitrov** (Stacklok) [@rdimitrov](https://github.com/rdimitrov) - WG Lead
+- **Tadas Antanavicius** (PulseMCP) [@tadasant](https://github.com/tadasant)
+- **Bob Dickinson** (TeamSpark) [@BobDickinson](https://github.com/BobDickinson)
+- **Preeti (Pree) Dewani** (Ravenmail) [@pree-dew](https://github.com/pree-dew)
 
-**User:**
+## Contributing
 
-> Split SGD 891 between 4 people.
+We use multiple channels for collaboration - see [modelcontextprotocol.io/community/communication](https://modelcontextprotocol.io/community/communication).
 
-**AI:** creates a SplitBill payment page
+Often (but not always) ideas flow through this pipeline:
 
-```
-SGD 222.75 × 3 participants   (you paid up front, so you are not billed)
-Share:  https://sposched.jittee.com/split/pay/?t=…
-Manage: https://sposched.jittee.com/split/manage/?t=…   (keep this one to yourself)
-Status: https://sposched.jittee.com/split/manage/?t=…   (read-only, safe to share)
-```
+- **[Discord](https://modelcontextprotocol.io/community/communication)** - Real-time community discussions
+- **[Discussions](https://github.com/modelcontextprotocol/registry/discussions)** - Propose and discuss product/technical requirements
+- **[Issues](https://github.com/modelcontextprotocol/registry/issues)** - Track well-scoped technical work  
+- **[Pull Requests](https://github.com/modelcontextprotocol/registry/pulls)** - Contribute work towards issues
 
-## Setup
+### Quick start:
 
-### 1. Get your key
+#### Pre-requisites
 
-Open <https://sposched.jittee.com/split/mcp/> and enter the PayNow number (or UEN) that
-should receive the money, plus the display name your payers will see in their banking app.
-You get a key that starts with `wkn_`, **shown only once**.
+- **Docker**
+- **Go 1.24.x**
+- **ko** - Container image builder for Go ([installation instructions](https://ko.build/install/))
+- **golangci-lint v2.4.0**
 
-The key is stored with your PayNow details, so the AI never has to ask for them again.
-
-> ⚠️ That key can create pages that collect money to your PayNow. Keep it to yourself.
-> It cannot move money. If you lose it, just create another one.
-
-### 2. Add the server
-
-**Claude Code**
+#### Running the server
 
 ```bash
-claude mcp add splitbill --env SPLITBILL_TOKEN=wkn_xxx -- npx -y splitbill-mcp
+# Start full development environment
+make dev-compose
 ```
 
-**Claude Desktop / any client with a JSON config**
+This starts the registry at [`localhost:8080`](http://localhost:8080) with PostgreSQL. The database uses ephemeral storage and is reset each time you restart the containers, ensuring a clean state for development and testing.
 
-```json
-{
-  "mcpServers": {
-    "splitbill": {
-      "command": "npx",
-      "args": ["-y", "splitbill-mcp"],
-      "env": { "SPLITBILL_TOKEN": "wkn_xxx" }
-    }
-  }
-}
+**Note:** The registry uses [ko](https://ko.build) to build container images. The `make dev-compose` command automatically builds the registry image with ko and loads it into your local Docker daemon before starting the services.
+
+By default, the registry seeds from the production API with a filtered subset of servers (to keep startup fast). This ensures your local environment mirrors production behavior and all seed data passes validation. For offline development you can seed from a file without validation with `MCP_REGISTRY_SEED_FROM=data/seed.json MCP_REGISTRY_ENABLE_REGISTRY_VALIDATION=false make dev-compose`.
+
+The setup can be configured with environment variables in [docker-compose.yml](./docker-compose.yml) - see [.env.example](./.env.example) for a reference.
+
+<details>
+<summary>Alternative: Running a pre-built Docker image</summary>
+
+Pre-built Docker images are automatically published to GitHub Container Registry. Note that the image does not bundle PostgreSQL, so you need to run your own and point the registry at it via `MCP_REGISTRY_DATABASE_URL` (see [docker-compose.yml](./docker-compose.yml) for a working example):
+
+```bash
+# Run latest stable release
+docker run -p 8080:8080 ghcr.io/modelcontextprotocol/registry:latest
+
+# Run latest from main branch (continuous deployment)
+docker run -p 8080:8080 ghcr.io/modelcontextprotocol/registry:main
+
+# Run specific release version
+docker run -p 8080:8080 ghcr.io/modelcontextprotocol/registry:v1.0.0
+
+# Run development build from main branch
+docker run -p 8080:8080 ghcr.io/modelcontextprotocol/registry:main-20250906-abc123d
 ```
 
-**Remote (no install)** — the same server is reachable over HTTP if your client prefers that:
+**Available tags:** 
+- **Releases**: `latest`, `v1.0.0`, `v1.1.0`, etc.
+- **Continuous**: `main` (latest main branch build)
+- **Development**: `main-<date>-<sha>` (specific commit builds)
+
+</details>
+
+#### Publishing a server
+
+To publish a server, we've built a simple CLI. You can use it with:
+
+```bash
+# Build the latest CLI
+make publisher
+
+# Use it!
+./bin/mcp-publisher --help
+```
+
+See [the publisher guide](./docs/modelcontextprotocol-io/quickstart.mdx) for more details.
+
+#### Other commands
+
+```bash
+# Run lint, unit tests and integration tests
+make check
+```
+
+There are also a few more helpful commands for development. Run `make help` to learn more, or look in [Makefile](./Makefile).
+
+<!--
+For Claude and other AI tools: Always prefer make targets over custom commands where possible.
+-->
+
+## Architecture
+
+### Project Structure
 
 ```
-https://yyeleqhfbbjnscaddutx.supabase.co/functions/v1/warikan-mcp?token=wkn_xxx
+├── cmd/                     # Application entry points
+│   └── publisher/           # Server publishing tool
+├── data/                    # Seed data
+├── deploy/                  # Deployment configuration (Pulumi)
+├── docs/                    # Documentation
+├── internal/                # Private application code
+│   ├── api/                 # HTTP handlers and routing
+│   ├── auth/                # Authentication (GitHub OAuth, JWT, namespace blocking)
+│   ├── config/              # Configuration management
+│   ├── database/            # Data persistence (PostgreSQL)
+│   ├── service/             # Business logic
+│   ├── telemetry/           # Metrics and monitoring
+│   └── validators/          # Input validation
+├── pkg/                     # Public packages
+│   ├── api/                 # API types and structures
+│   │   └── v0/              # Version 0 API types
+│   └── model/               # Data models for server.json
+├── scripts/                 # Development and testing scripts
+├── tests/                   # Integration tests
+└── tools/                   # CLI tools and utilities
+    └── validate-*.sh        # Schema validation tools
 ```
 
-In ChatGPT (Settings → Connectors → New plugin) paste that URL as the **Server URL** and set
-**Authentication: No authentication** — the default OAuth is not implemented and will fail.
+### Authentication
 
-### 3. Ask
+Publishing supports multiple authentication methods:
+- **GitHub OAuth** - For publishing by logging into GitHub
+- **GitHub OIDC** - For publishing from GitHub Actions
+- **DNS verification** - For proving ownership of a domain and its subdomains
+- **HTTP verification** - For proving ownership of a domain
 
-> "Split this receipt four ways. Tanaka did not drink, so $20 for him."
+The registry validates namespace ownership when publishing. E.g. to publish...:
+- `io.github.domdomegg/my-cool-mcp` you must login to GitHub as `domdomegg`, or be in a GitHub Action on domdomegg's repos
+- `me.adamjones/my-cool-mcp` you must prove ownership of `adamjones.me` via DNS or HTTP challenge
 
-## Tools
+## Community Projects
 
-| Tool | What it does |
-|---|---|
-| `create_split` | Create the page. Takes a total or itemised receipt, a head count, optional names, per-person overrides and rounding. Returns the manage URL, the share URLs (one per amount) and a read-only status URL. |
-| `list_splits` | Splits created with this key, newest first, with how much has been collected and who is left. |
-| `get_split` | One split: who has paid, their notes, the share URLs. |
+Check out [community projects](docs/community-projects.md) to explore notable registry-related work created by the community.
 
-By default **you are treated as the person who paid up front**: you count towards the head
-count, but no payment link is created for you. Pass `i_paid: false` to turn that off.
+## More documentation
 
-## Environment
-
-| Variable | Meaning |
-|---|---|
-| `SPLITBILL_TOKEN` | Your key from `/split/mcp` (starts with `wkn_`). Required. |
-| `SPLITBILL_URL` | Endpoint override. Only needed to point at a non-production environment. |
-
-## Good to know
-
-- **No sign-up, no login.** The key is the only credential.
-- **Money never passes through us.** Payments go directly between banking apps over PayNow.
-  SplitBill only shows the amount and the recipient, and records who says they have paid.
-- **Pages delete themselves** 7 days after the last payment, images included.
-- NRIC cannot be used as a PayNow recipient (Singapore PDPA); mobile number or UEN only.
-- Amounts are SGD.
-- Anyone can create a split page, so payment pages carry a standing warning and a report
-  button. Never send money from a link you got from someone you do not know.
-
-## Privacy and terms
-
-- Terms of use: <https://sposched.jittee.com/split/terms/>
-- Contact: info@jittee.com
-
-## License
-
-MIT © Jittee Pte. Ltd.
+See the [documentation](./docs) for more details if your question has not been answered here!
