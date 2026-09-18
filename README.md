@@ -39,18 +39,39 @@ Status: https://sposched.jittee.com/split/manage/?t=…   (read-only, safe to sh
 
 ## Setup
 
-### 1. Get your key
+### Option A — point your client at the remote server (recommended)
 
-Open <https://sposched.jittee.com/split/mcp/> and enter the PayNow number (or UEN) that
-should receive the money, plus the display name your payers will see in their banking app.
-You get a key that starts with `wkn_`, **shown only once**.
+```
+https://jittee.com/mcp/splitbill
+```
 
-The key is stored with your PayNow details, so the AI never has to ask for them again.
+That endpoint speaks **OAuth 2.1** (dynamic client registration + PKCE), so there is no key to
+copy around. Connecting opens SplitBill, you enter the PayNow number (or UEN) that should
+receive the money plus the display name your payers will see in their banking app, and you
+press allow. The key is created at that moment and kept by your client, and the AI is never
+asked for your number again.
+
+**Claude Code**
+
+```bash
+claude mcp add --transport http splitbill https://jittee.com/mcp/splitbill
+```
+
+**Claude Desktop / claude.ai / ChatGPT** — Settings → Connectors → add a custom connector and
+paste the URL. Leave authentication on OAuth.
+
+**Smithery** — <https://smithery.ai/server/jittee/splitbill> does the same through its gateway.
+
+### Option B — hold the key yourself
+
+For a stdio install, or a client that does not speak OAuth.
+
+Open <https://sposched.jittee.com/split/mcp/> and enter the PayNow number (or UEN) that should
+receive the money, plus the display name your payers will see in their banking app. You get a
+key that starts with `wkn_`, **shown only once**.
 
 > ⚠️ That key can create pages that collect money to your PayNow. Keep it to yourself.
 > It cannot move money. If you lose it, just create another one.
-
-### 2. Add the server
 
 **Claude Code**
 
@@ -58,7 +79,7 @@ The key is stored with your PayNow details, so the AI never has to ask for them 
 claude mcp add splitbill --env SPLITBILL_TOKEN=wkn_xxx -- npx -y splitbill-mcp
 ```
 
-**Claude Desktop / any client with a JSON config**
+**Any client with a JSON config**
 
 ```json
 {
@@ -72,27 +93,14 @@ claude mcp add splitbill --env SPLITBILL_TOKEN=wkn_xxx -- npx -y splitbill-mcp
 }
 ```
 
-**Remote (no install)** — the same server is reachable over HTTP if your client prefers that:
-
-```
-https://jittee.com/mcp/splitbill
-```
-
-That endpoint speaks **OAuth 2.1** (dynamic client registration + PKCE), so a client that
-supports remote MCP servers can just take the URL: it will send you to SplitBill, you enter
-the PayNow number that collects the money, you press allow, and the key is created for you.
-
-If your client does not do OAuth, pass the key yourself instead — either as a bearer token or
-in the URL:
+**Remote, with the key in the URL** — for clients that cannot send headers. Choose
+**No authentication**, since the key is already in the URL:
 
 ```
 https://jittee.com/mcp/splitbill?token=wkn_xxx
 ```
 
-In ChatGPT (Settings → Connectors → New plugin) paste the plain URL as the **Server URL** and
-leave authentication on OAuth; or paste the `?token=` form and choose **No authentication**.
-
-### 3. Ask
+### Then ask
 
 > "Split this receipt four ways. Tanaka did not drink, so $20 for him."
 
