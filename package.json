@@ -1,6 +1,6 @@
 {
   "name": "splitbill-mcp",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "mcpName": "com.jittee/splitbill",
   "description": "Split bills and collect payments through PayNow (Singapore) from your AI. MCP server for SplitBill.",
   "keywords": [
