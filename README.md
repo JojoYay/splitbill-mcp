@@ -127,6 +127,7 @@ count, but no payment link is created for you. Pass `i_paid: false` to turn that
 
 ## Privacy and terms
 
+- Privacy policy: <https://sposched.jittee.com/split/privacy/>
 - Terms of use: <https://sposched.jittee.com/split/terms/>
 - Contact: info@jittee.com
 
