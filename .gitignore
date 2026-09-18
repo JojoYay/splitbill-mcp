@@ -2,3 +2,7 @@ node_modules/
 *.log
 .env
 .npmrc
+.npmrc
+key.pem
+auth-record.txt
+mcp-publisher*
