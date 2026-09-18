@@ -31,7 +31,8 @@
     "index.js",
     "server.json",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "glama.json"
   ],
   "engines": {
     "node": ">=18"
