@@ -24,13 +24,17 @@ const token = (process.env.SPLITBILL_TOKEN || '').trim();
 /** URLに ?token= が入っているなら、それで足りる (ヘッダーは付けない) */
 const tokenInUrl = /[?&]token=/.test(endpoint);
 
+// 鍵が無くても**起動はする**。サーバーは鍵なしでも tools/list に答えるので、
+// ディレクトリの自動検査 (Glama 等) がツール一覧を読める。実際に割り勘を作る
+// ところでサーバーが 401 を返し、その文面がそのままクライアントに届く。
+// ⚠ ここで process.exit(1) すると、検査側からは「壊れたサーバー」に見えて
+//    一覧が永久に空のままになる (2026-09-18 Glamaで実測)。
 if (!token && !tokenInUrl) {
     process.stderr.write(
-        'splitbill-mcp: SPLITBILL_TOKEN がありません。\n'
-        + 'https://sposched.jittee.com/split/mcp/ で接続を作り、wkn_ で始まる鍵を\n'
-        + 'SPLITBILL_TOKEN に入れてください。\n',
+        'splitbill-mcp: no SPLITBILL_TOKEN. You can list the tools, but creating a split\n'
+        + 'will fail. Make a connection at https://sposched.jittee.com/split/mcp/ and put\n'
+        + 'the wkn_ key in SPLITBILL_TOKEN.\n',
     );
-    process.exit(1);
 }
 
 const headers = {
