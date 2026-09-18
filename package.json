@@ -1,0 +1,41 @@
+{
+  "name": "splitbill-mcp",
+  "version": "1.0.0",
+  "description": "Split bills and collect payments through PayNow (Singapore) from your AI. MCP server for SplitBill.",
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "paynow",
+    "singapore",
+    "split-bill",
+    "expenses",
+    "claude",
+    "chatgpt"
+  ],
+  "homepage": "https://jittee.com/splitbill",
+  "bugs": {
+    "url": "https://github.com/JojoYay/splitbill-mcp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JojoYay/splitbill-mcp.git"
+  },
+  "license": "MIT",
+  "author": "Jittee Pte. Ltd. <info@jittee.com>",
+  "type": "module",
+  "bin": {
+    "splitbill-mcp": "index.js"
+  },
+  "files": [
+    "index.js",
+    "server.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "smoke": "node smoke.js"
+  }
+}
