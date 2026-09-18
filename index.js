@@ -41,9 +41,24 @@ const headers = {
 
 const out = (obj) => process.stdout.write(`${JSON.stringify(obj)}\n`);
 
+/**
+ * 終わり方の面倒 (0277)。標準入力が閉じても、**投げたものが返るまでは終わらない**。
+ * 先に終わると、最後の1件の応答を落としたまま消えることになる。
+ */
+let pending = 0;
+let stdinEnded = false;
+const maybeExit = () => {
+    // ⚠ ここで process.exit() を呼んではいけない。**標準出力がパイプのとき、
+    //    書き込み途中のものを道連れにして消える** (Nodeの落とし穴)。実際、
+    //    最後に返ってきた応答が1件まるごと失われていた。
+    //    何も残っていなければイベントループが空になって自然に終わる。
+    if (stdinEnded && pending === 0) process.exitCode = 0;
+};
+
 /** 1件を投げて、返ってきたら書き戻す。通知 (idなし) は書き戻さない */
 async function forward(msg) {
     const isNotification = msg == null || msg.id === undefined || msg.id === null;
+    pending += 1;
     try {
         const res = await fetch(endpoint, {
             method: 'POST',
@@ -75,6 +90,9 @@ async function forward(msg) {
             id: msg.id,
             error: { code: -32001, message: `splitbill-mcp: ${e?.message ?? String(e)}` },
         });
+    } finally {
+        pending -= 1;
+        maybeExit();
     }
 }
 
@@ -98,4 +116,4 @@ process.stdin.on('data', (chunk) => {
         void forward(msg);
     }
 });
-process.stdin.on('end', () => process.exit(0));
+process.stdin.on('end', () => { stdinEnded = true; maybeExit(); });
