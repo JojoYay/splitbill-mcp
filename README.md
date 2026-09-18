@@ -5,6 +5,8 @@ Split bills and collect payments through **PayNow (Singapore)** — from the AI 
 You paid for the dinner. SplitBill works out who owes what and gives you links to send.
 Money never passes through us: everyone pays from their own banking app.
 
+[![smithery badge](https://smithery.ai/badge/jittee/splitbill)](https://smithery.ai/servers/jittee/splitbill)
+
 - Product page: <https://jittee.com/splitbill>
 - Web app (no sign-up): <https://sposched.jittee.com/split/>
 
