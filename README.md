@@ -73,11 +73,22 @@ claude mcp add splitbill --env SPLITBILL_TOKEN=wkn_xxx -- npx -y splitbill-mcp
 **Remote (no install)** — the same server is reachable over HTTP if your client prefers that:
 
 ```
-https://yyeleqhfbbjnscaddutx.supabase.co/functions/v1/warikan-mcp?token=wkn_xxx
+https://jittee.com/mcp/splitbill
 ```
 
-In ChatGPT (Settings → Connectors → New plugin) paste that URL as the **Server URL** and set
-**Authentication: No authentication** — the default OAuth is not implemented and will fail.
+That endpoint speaks **OAuth 2.1** (dynamic client registration + PKCE), so a client that
+supports remote MCP servers can just take the URL: it will send you to SplitBill, you enter
+the PayNow number that collects the money, you press allow, and the key is created for you.
+
+If your client does not do OAuth, pass the key yourself instead — either as a bearer token or
+in the URL:
+
+```
+https://jittee.com/mcp/splitbill?token=wkn_xxx
+```
+
+In ChatGPT (Settings → Connectors → New plugin) paste the plain URL as the **Server URL** and
+leave authentication on OAuth; or paste the `?token=` form and choose **No authentication**.
 
 ### 3. Ask
 

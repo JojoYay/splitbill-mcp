@@ -17,7 +17,7 @@
  * ⚠ お金はこの仕組みを通らない。作れるのは「割り勘のページ」だけ。
  */
 
-const DEFAULT_URL = 'https://yyeleqhfbbjnscaddutx.supabase.co/functions/v1/warikan-mcp';
+const DEFAULT_URL = 'https://jittee.com/mcp/splitbill';
 
 const endpoint = (process.env.SPLITBILL_URL || DEFAULT_URL).trim();
 const token = (process.env.SPLITBILL_TOKEN || '').trim();
